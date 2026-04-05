@@ -1,5 +1,3 @@
-import re
-
 from veilguard.patterns import CREDENTIAL_PATTERNS, CREDENTIAL_PREFIX_QUICK_CHECK
 
 
