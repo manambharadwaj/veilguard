@@ -267,12 +267,12 @@ together.
 \begin{figure*}[t]
 \centering
 \begin{tikzpicture}[
-    box/.style={draw, rounded corners=3pt, minimum width=2.4cm, minimum height=1cm,
+    box/.style={draw, rounded corners=3pt, minimum width=2.6cm, minimum height=1.1cm,
                 font=\small, align=center, thick},
-    clibox/.style={draw, rounded corners=3pt, minimum width=2.8cm, minimum height=1.2cm,
+    clibox/.style={draw, rounded corners=3pt, minimum width=3cm, minimum height=1.3cm,
                    font=\small, align=center, thick, fill=blue!8},
-    arr/.style={-{Stealth[length=3mm]}, thick, gray!80},
-    darr/.style={{Stealth[length=3mm]}-{Stealth[length=3mm]}, thick, gray!80},
+    arr/.style={-{Stealth[length=3mm]}, thick, black!60},
+    darr/.style={{Stealth[length=3mm]}-{Stealth[length=3mm]}, thick, black!60},
     lbl/.style={font=\footnotesize, fill=white, inner sep=2pt},
   ]
 
@@ -280,53 +280,52 @@ together.
   \node[clibox] (cli) {\textbf{VeilGuard}\\CLI};
 
   % Left of CLI: AI Tool
-  \node[box, fill=red!8, left=4cm of cli] (ai) {AI Tool\\(Cursor, Claude, \ldots)};
+  \node[box, fill=red!8, left=4.5cm of cli] (ai) {AI Tool\\(Cursor, Claude, \ldots)};
 
   % Right of CLI: Encrypted Store
-  \node[box, fill=yellow!8, right=4cm of cli] (store) {Encrypted\\Secret Store\\(AES-256-GCM)};
+  \node[box, fill=yellow!8, right=4.5cm of cli] (store) {Encrypted\\Secret Store\\(AES-256-GCM)};
 
   % Above CLI: Pattern Scanner
-  \node[box, fill=purple!8, above=1.5cm of cli] (scan) {Pattern Scanner\\(55 regexes)};
+  \node[box, fill=purple!8, above=1.8cm of cli] (scan) {Pattern Scanner\\(55 regexes)};
 
   % Below CLI: Hooks
-  \node[box, fill=green!8, below=1.5cm of cli, minimum width=2.8cm] (hooks) {Hooks / Deny Rules\\/ Instructions};
+  \node[box, fill=green!8, below=1.8cm of cli, minimum width=3cm] (hooks) {Hooks / Deny Rules\\/ Instructions};
 
   % Below AI Tool: Transcripts
-  \node[box, fill=orange!8, below=1.5cm of ai] (trans) {Transcripts\\(.jsonl)};
+  \node[box, fill=orange!8, below=1.8cm of ai] (trans) {Transcripts\\(.jsonl)};
 
-  % Arrow: CLI -> Scanner
+  % 1. CLI invokes Scanner (vertical, clean)
   \draw[arr] (cli) -- node[lbl, right=2pt] {invokes} (scan);
 
-  % Arrow: Scanner -> scans files (left)
-  \draw[arr] (scan.west) -- node[lbl, above] {scans files} (scan.west -| ai.north);
+  % 2. Scanner scans project files (arrow left from scanner, stops above AI Tool)
+  \draw[arr] (scan) -- node[lbl, above] {scans project files} (ai |- scan);
 
-  % Arrow: CLI <-> Store
+  % 3. CLI <-> Encrypted Store (horizontal, clean)
   \draw[darr] (cli) -- node[lbl, above] {encrypt / decrypt} (store);
 
-  % Arrow: CLI -> Hooks
+  % 4. CLI installs Hooks (vertical, clean)
   \draw[arr] (cli) -- node[lbl, right=2pt] {installs} (hooks);
 
-  % Arrow: Hooks -> AI Tool (constrains)
-  \draw[arr] (hooks) -- node[lbl, below] {constrains} (trans.east |- hooks);
-  \draw[arr] (trans.east |- hooks) -- (ai);
+  % 5. Hooks constrains AI Tool (direct horizontal arrow)
+  \draw[arr] (hooks) -- node[lbl, below] {constrains} (ai);
 
-  % Arrow: AI Tool -> Transcripts
+  % 6. AI Tool writes Transcripts (vertical, clean)
   \draw[arr] (ai) -- node[lbl, left=2pt] {writes} (trans);
 
-  % Arrow: CLI -> Transcripts (clean/watch)
-  \draw[arr] (cli) -- node[lbl, below] {clean / watch} (trans);
+  % 7. CLI redacts Transcripts (diagonal, single clean line)
+  \draw[arr] (cli) -- node[lbl, above, sloped] {clean / watch} (trans);
 
   % Bounding box
   \begin{scope}[on background layer]
-    \node[draw=gray!60, dashed, rounded corners=6pt, line width=1pt,
+    \node[draw=gray!50, dashed, rounded corners=6pt, line width=1pt,
           fit=(ai)(cli)(store)(hooks)(trans)(scan),
-          inner xsep=1cm, inner ysep=0.7cm,
+          inner xsep=1.2cm, inner ysep=0.8cm,
           label={[font=\small, fill=white, inner sep=3pt]above:\textit{Developer Machine}}] {};
   \end{scope}
 \end{tikzpicture}
 \caption{VeilGuard system architecture. The CLI installs hooks and deny rules
-into AI tool configurations, runs the pattern scanner over source and config
-files, redacts transcripts, and manages an encrypted secret store. The dashed
+into AI tool configurations, invokes the pattern scanner over project files,
+redacts transcripts, and manages an encrypted secret store. The dashed
 boundary represents the local machine; no data crosses it.}
 \label{fig:arch}
 \end{figure*}
