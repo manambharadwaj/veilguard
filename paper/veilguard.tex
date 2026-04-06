@@ -267,59 +267,53 @@ together.
 \begin{figure*}[t]
 \centering
 \begin{tikzpicture}[
-    box/.style={draw, rounded corners=3pt, minimum width=2.6cm, minimum height=1.1cm,
+    box/.style={draw, rounded corners=3pt, minimum width=2.4cm, minimum height=1cm,
                 font=\small, align=center, thick},
-    clibox/.style={draw, rounded corners=3pt, minimum width=3cm, minimum height=1.3cm,
+    clibox/.style={draw, rounded corners=3pt, minimum width=2.6cm, minimum height=1.1cm,
                    font=\small, align=center, thick, fill=blue!8},
     arr/.style={-{Stealth[length=3mm]}, thick, black!60},
     darr/.style={{Stealth[length=3mm]}-{Stealth[length=3mm]}, thick, black!60},
     lbl/.style={font=\footnotesize, fill=white, inner sep=2pt},
   ]
 
-  % Center: VeilGuard CLI
+  % --- Row 2 (middle): main components ---
   \node[clibox] (cli) {\textbf{VeilGuard}\\CLI};
+  \node[box, fill=red!8,    left=3.5cm of cli]  (ai)    {AI Tool\\(Cursor, Claude, \ldots)};
+  \node[box, fill=yellow!8, right=3.5cm of cli] (store) {Encrypted\\Secret Store\\(AES-256-GCM)};
 
-  % Left of CLI: AI Tool
-  \node[box, fill=red!8, left=4.5cm of cli] (ai) {AI Tool\\(Cursor, Claude, \ldots)};
+  % --- Row 1 (top): scanner ---
+  \node[box, fill=purple!8, above=1.6cm of cli] (scan) {Pattern Scanner\\(55 regexes)};
 
-  % Right of CLI: Encrypted Store
-  \node[box, fill=yellow!8, right=4.5cm of cli] (store) {Encrypted\\Secret Store\\(AES-256-GCM)};
+  % --- Row 3 (bottom): hooks under AI Tool, transcripts under CLI ---
+  \node[box, fill=green!8,  below=1.6cm of ai,  minimum width=2.6cm] (hooks) {Hooks / Deny Rules\\/ Instructions};
+  \node[box, fill=orange!8, below=1.6cm of cli] (trans) {Transcripts\\(.jsonl)};
 
-  % Above CLI: Pattern Scanner
-  \node[box, fill=purple!8, above=1.8cm of cli] (scan) {Pattern Scanner\\(55 regexes)};
-
-  % Below CLI: Hooks
-  \node[box, fill=green!8, below=1.8cm of cli, minimum width=3cm] (hooks) {Hooks / Deny Rules\\/ Instructions};
-
-  % Below AI Tool: Transcripts
-  \node[box, fill=orange!8, below=1.8cm of ai] (trans) {Transcripts\\(.jsonl)};
-
-  % 1. CLI invokes Scanner (vertical, clean)
+  % 1. CLI -> Scanner  (vertical up)
   \draw[arr] (cli) -- node[lbl, right=2pt] {invokes} (scan);
 
-  % 2. Scanner scans project files (arrow left to AI Tool top)
-  \draw[arr] (scan) -- node[lbl, above] {scans project files} (ai.north -| ai);
+  % 2. Scanner -> AI Tool  (L-shape: left along top, then down)
+  \draw[arr] (scan.west) -| node[lbl, above, pos=0.25] {scans project files} (ai.north);
 
-  % 3. CLI <-> Encrypted Store (horizontal)
+  % 3. CLI <-> Secret Store  (horizontal)
   \draw[darr] (cli) -- node[lbl, above] {encrypt / decrypt} (store);
 
-  % 4. CLI installs Hooks (vertical)
-  \draw[arr] (cli) -- node[lbl, right=2pt] {installs} (hooks);
+  % 4. CLI -> Hooks  (diagonal down-left, label near CLI)
+  \draw[arr] (cli) -- node[lbl, above, sloped, pos=0.3] {installs} (hooks);
 
-  % 5. Hooks constrains AI Tool (direct, with label offset below)
-  \draw[arr] (hooks) -- node[lbl, below, pos=0.65] {constrains} (ai);
+  % 5. Hooks -> AI Tool  (vertical up, no crossing)
+  \draw[arr] (hooks) -- node[lbl, left=2pt] {constrains} (ai);
 
-  % 6. AI Tool writes Transcripts (vertical)
-  \draw[arr] (ai) -- node[lbl, left=2pt] {writes} (trans);
+  % 6. AI Tool -> Transcripts  (diagonal down-right, label near AI Tool)
+  \draw[arr] (ai) -- node[lbl, above, sloped, pos=0.3] {writes} (trans);
 
-  % 7. CLI redacts Transcripts (routed as L-shape to avoid crossing)
-  \draw[arr] (cli.west) -- ++(-0.8,0) |- node[lbl, left, pos=0.25] {clean / watch} (trans.east);
+  % 7. CLI -> Transcripts  (vertical down, no crossing)
+  \draw[arr] (cli) -- node[lbl, right=2pt] {clean / watch} (trans);
 
   % Bounding box
   \begin{scope}[on background layer]
     \node[draw=gray!50, dashed, rounded corners=6pt, line width=1pt,
           fit=(ai)(cli)(store)(hooks)(trans)(scan),
-          inner xsep=1.2cm, inner ysep=0.8cm,
+          inner xsep=0.5cm, inner ysep=0.5cm,
           label={[font=\small, fill=white, inner sep=3pt]above:\textit{Developer Machine}}] {};
   \end{scope}
 \end{tikzpicture}
