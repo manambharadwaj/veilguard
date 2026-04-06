@@ -1,0 +1,1283 @@
+{
+  "detection": {
+    "overall": {
+      "true_positives": 63,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "true_negatives": 25,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "per_category": {
+      "anthropic": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      "aws-access": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "aws-sts": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "azure": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "bitbucket": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "digitalocean": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "discord-bot": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "discord-webhook": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "dockerhub": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "firebase-fcm": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "fireworks": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "fly-io": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "gcp-service-account": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "github-app": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "github-fine": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "github-oauth": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "github-pat": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      "github-refresh": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "gitlab": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "gitlab-pipeline": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "gitlab-runner": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "google": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "google-oauth": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "grafana": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "groq": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "heroku": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "huggingface": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "linear": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "mongodb": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "mysql": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "netlify": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "newrelic": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "newrelic-insight": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "npm": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "openai-legacy": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "openai-proj": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      "openrouter": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "pem-private-key": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "perplexity": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "postgres": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      "pypi": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "redis": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "replicate": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "sendgrid": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "sentry": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      "slack": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      "slack-app": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "slack-webhook": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "square": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "stripe": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      "stripe-restricted": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "stripe-test": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "stripe-webhook": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "supabase": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "telegram-bot": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "twilio": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      }
+    },
+    "file_results": [
+      {
+        "file": "edge_cases/edge_base64_blob.py",
+        "expected_count": 0,
+        "actual_count": 0,
+        "match": true,
+        "description": "Random alphanumeric that is not a credential"
+      },
+      {
+        "file": "edge_cases/edge_comment_with_real.py",
+        "expected_count": 1,
+        "actual_count": 1,
+        "match": true,
+        "description": "Comment says not to commit, but key is real"
+      },
+      {
+        "file": "edge_cases/edge_env_ref_with_secret.py",
+        "expected_count": 1,
+        "actual_count": 1,
+        "match": true,
+        "description": "Env ref fallback contains real credential"
+      },
+      {
+        "file": "edge_cases/edge_long_line.py",
+        "expected_count": 0,
+        "actual_count": 0,
+        "match": true,
+        "description": "Line exceeds 4096 char limit, should be skipped"
+      },
+      {
+        "file": "edge_cases/edge_mixed_content.py",
+        "expected_count": 1,
+        "actual_count": 1,
+        "match": true,
+        "description": "Secret sandwiched between safe env references"
+      },
+      {
+        "file": "edge_cases/edge_multiline_json.json",
+        "expected_count": 1,
+        "actual_count": 1,
+        "match": true,
+        "description": "Secret buried in nested JSON"
+      },
+      {
+        "file": "edge_cases/edge_pem_public_key.pem",
+        "expected_count": 0,
+        "actual_count": 0,
+        "match": true,
+        "description": "Public key header should not match private key pattern"
+      },
+      {
+        "file": "edge_cases/edge_two_patterns_one_line.py",
+        "expected_count": 1,
+        "actual_count": 1,
+        "match": true,
+        "description": "Two secrets on one line; scanner takes first match"
+      },
+      {
+        "file": "edge_cases/edge_url_like_redis.py",
+        "expected_count": 1,
+        "actual_count": 1,
+        "match": true,
+        "description": "Redis URL without password still matches pattern"
+      },
+      {
+        "file": "edge_cases/edge_uuid_heavy.py",
+        "expected_count": 0,
+        "actual_count": 0,
+        "match": true,
+        "description": "UUIDs and hex strings should not match"
+      },
+      {
+        "file": "true_negatives/clean_base64.py",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_comments.js",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_config_template.json",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_crypto.py",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_css.css",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_docker_compose.yml",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_dockerfile.sh",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_env_example.env",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_gitignore.sh",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_go.go",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_html.html",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_java.java",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_javascript.js",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_known_examples.py",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_math.py",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_placeholder.py",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_python.py",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_readme.md",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_regex.py",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_rust.rs",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_short_tokens.py",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_sql.sql",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_terraform.sh",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_uuid.py",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_negatives/clean_yaml.yml",
+        "expected": [],
+        "found": [],
+        "match": true
+      },
+      {
+        "file": "true_positives/anthropic_key.py",
+        "expected": [
+          "anthropic"
+        ],
+        "found": [
+          "anthropic"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/aws_creds.py",
+        "expected": [
+          "aws-access"
+        ],
+        "found": [
+          "aws-access"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/aws_sts.sh",
+        "expected": [
+          "aws-sts"
+        ],
+        "found": [
+          "aws-sts"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/azure_storage.py",
+        "expected": [
+          "azure"
+        ],
+        "found": [
+          "azure"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/bitbucket.env",
+        "expected": [
+          "bitbucket"
+        ],
+        "found": [
+          "bitbucket"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/discord_bot.js",
+        "expected": [
+          "discord-bot"
+        ],
+        "found": [
+          "discord-bot"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/discord_hook.sh",
+        "expected": [
+          "discord-webhook"
+        ],
+        "found": [
+          "discord-webhook"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/do_token.sh",
+        "expected": [
+          "digitalocean"
+        ],
+        "found": [
+          "digitalocean"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/docker_pat.sh",
+        "expected": [
+          "dockerhub"
+        ],
+        "found": [
+          "dockerhub"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/firebase_key.json",
+        "expected": [
+          "firebase-fcm"
+        ],
+        "found": [
+          "firebase-fcm"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/fireworks.py",
+        "expected": [
+          "fireworks"
+        ],
+        "found": [
+          "fireworks"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/fly_token.sh",
+        "expected": [
+          "fly-io"
+        ],
+        "found": [
+          "fly-io"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/gcp_sa.json",
+        "expected": [
+          "gcp-service-account"
+        ],
+        "found": [
+          "gcp-service-account"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/gh_app.sh",
+        "expected": [
+          "github-app"
+        ],
+        "found": [
+          "github-app"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/gh_fine.env",
+        "expected": [
+          "github-fine"
+        ],
+        "found": [
+          "github-fine"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/gh_oauth.py",
+        "expected": [
+          "github-oauth"
+        ],
+        "found": [
+          "github-oauth"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/gh_refresh.env",
+        "expected": [
+          "github-refresh"
+        ],
+        "found": [
+          "github-refresh"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/gh_token.sh",
+        "expected": [
+          "github-pat"
+        ],
+        "found": [
+          "github-pat"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/gitlab_pat.sh",
+        "expected": [
+          "gitlab"
+        ],
+        "found": [
+          "gitlab"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/gitlab_pipeline.yml",
+        "expected": [
+          "gitlab-pipeline"
+        ],
+        "found": [
+          "gitlab-pipeline"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/gitlab_runner.toml",
+        "expected": [
+          "gitlab-runner"
+        ],
+        "found": [
+          "gitlab-runner"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/google_key.js",
+        "expected": [
+          "google"
+        ],
+        "found": [
+          "google"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/google_oauth.py",
+        "expected": [
+          "google-oauth"
+        ],
+        "found": [
+          "google-oauth"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/grafana.env",
+        "expected": [
+          "grafana"
+        ],
+        "found": [
+          "grafana"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/groq_api.py",
+        "expected": [
+          "groq"
+        ],
+        "found": [
+          "groq"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/heroku_key.rb",
+        "expected": [
+          "heroku"
+        ],
+        "found": [
+          "heroku"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/hf_token.py",
+        "expected": [
+          "huggingface"
+        ],
+        "found": [
+          "huggingface"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/linear.env",
+        "expected": [
+          "linear"
+        ],
+        "found": [
+          "linear"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/mongo_uri.py",
+        "expected": [
+          "mongodb"
+        ],
+        "found": [
+          "mongodb"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/multi_config.json",
+        "expected": [
+          "github-pat",
+          "sentry",
+          "slack"
+        ],
+        "found": [
+          "github-pat",
+          "sentry",
+          "slack"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/multi_env.env",
+        "expected": [
+          "anthropic",
+          "openai-proj",
+          "postgres",
+          "stripe"
+        ],
+        "found": [
+          "anthropic",
+          "openai-proj",
+          "postgres",
+          "stripe"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/mysql_uri.py",
+        "expected": [
+          "mysql"
+        ],
+        "found": [
+          "mysql"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/netlify_pat.env",
+        "expected": [
+          "netlify"
+        ],
+        "found": [
+          "netlify"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/newrelic.env",
+        "expected": [
+          "newrelic"
+        ],
+        "found": [
+          "newrelic"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/newrelic_insight.sh",
+        "expected": [
+          "newrelic-insight"
+        ],
+        "found": [
+          "newrelic-insight"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/npmrc_token.sh",
+        "expected": [
+          "npm"
+        ],
+        "found": [
+          "npm"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/openai_legacy.env",
+        "expected": [
+          "openai-legacy"
+        ],
+        "found": [
+          "openai-legacy"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/openai_proj.py",
+        "expected": [
+          "openai-proj"
+        ],
+        "found": [
+          "openai-proj"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/openrouter_config.json",
+        "expected": [
+          "openrouter"
+        ],
+        "found": [
+          "openrouter"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/perplexity_key.env",
+        "expected": [
+          "perplexity"
+        ],
+        "found": [
+          "perplexity"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/pg_uri.env",
+        "expected": [
+          "postgres"
+        ],
+        "found": [
+          "postgres"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/private.pem",
+        "expected": [
+          "pem-private-key"
+        ],
+        "found": [
+          "pem-private-key"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/pypi_token.env",
+        "expected": [
+          "pypi"
+        ],
+        "found": [
+          "pypi"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/redis_uri.env",
+        "expected": [
+          "redis"
+        ],
+        "found": [
+          "redis"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/replicate_token.sh",
+        "expected": [
+          "replicate"
+        ],
+        "found": [
+          "replicate"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/sendgrid.env",
+        "expected": [
+          "sendgrid"
+        ],
+        "found": [
+          "sendgrid"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/sentry.env",
+        "expected": [
+          "sentry"
+        ],
+        "found": [
+          "sentry"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/slack_app.env",
+        "expected": [
+          "slack-app"
+        ],
+        "found": [
+          "slack-app"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/slack_bot.py",
+        "expected": [
+          "slack"
+        ],
+        "found": [
+          "slack"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/slack_webhook.sh",
+        "expected": [
+          "slack-webhook"
+        ],
+        "found": [
+          "slack-webhook"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/square.py",
+        "expected": [
+          "square"
+        ],
+        "found": [
+          "square"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/stripe_hook.env",
+        "expected": [
+          "stripe-webhook"
+        ],
+        "found": [
+          "stripe-webhook"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/stripe_live.py",
+        "expected": [
+          "stripe"
+        ],
+        "found": [
+          "stripe"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/stripe_restricted.env",
+        "expected": [
+          "stripe-restricted"
+        ],
+        "found": [
+          "stripe-restricted"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/stripe_test.py",
+        "expected": [
+          "stripe-test"
+        ],
+        "found": [
+          "stripe-test"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/supabase_key.ts",
+        "expected": [
+          "supabase"
+        ],
+        "found": [
+          "supabase"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/telegram.py",
+        "expected": [
+          "telegram-bot"
+        ],
+        "found": [
+          "telegram-bot"
+        ],
+        "match": true
+      },
+      {
+        "file": "true_positives/twilio.py",
+        "expected": [
+          "twilio"
+        ],
+        "found": [
+          "twilio"
+        ],
+        "match": true
+      }
+    ]
+  },
+  "throughput": {
+    "files": 93,
+    "total_lines": 231,
+    "avg_seconds": 0.0111,
+    "files_per_second": 8359.9,
+    "lines_per_second": 20764.9,
+    "iterations": 5
+  }
+}

@@ -1,0 +1,46 @@
+[
+  {
+    "tool": "veilguard",
+    "tp": 58,
+    "fp": 0,
+    "fn": 0,
+    "tn": 25,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "elapsed": 0.014483416976872832
+  },
+  {
+    "tool": "detect-secrets",
+    "tp": 0,
+    "fp": 0,
+    "fn": 58,
+    "tn": 25,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "elapsed": 0.40819641697453335
+  },
+  {
+    "tool": "gitleaks",
+    "tp": 43,
+    "fp": 0,
+    "fn": 15,
+    "tn": 25,
+    "precision": 1.0,
+    "recall": 0.7414,
+    "f1": 0.8515,
+    "elapsed": 0.12985100003425032
+  },
+  {
+    "tool": "trufflehog",
+    "tp": 21,
+    "fp": 0,
+    "fn": 37,
+    "tn": 25,
+    "precision": 1.0,
+    "recall": 0.3621,
+    "f1": 0.5316,
+    "elapsed": 2.101608833007049
+  }
+]
