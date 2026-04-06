@@ -273,7 +273,7 @@ together.
                    font=\small, align=center, thick, fill=blue!8},
     arr/.style={-{Stealth[length=3mm]}, thick, black!60},
     darr/.style={{Stealth[length=3mm]}-{Stealth[length=3mm]}, thick, black!60},
-    lbl/.style={font=\footnotesize, fill=white, inner sep=2pt},
+    lbl/.style={font=\footnotesize, inner sep=1pt},
   ]
 
   % --- Row 2 (middle): main components ---
@@ -289,25 +289,25 @@ together.
   \node[box, fill=orange!8, below=1.6cm of cli] (trans) {Transcripts\\(.jsonl)};
 
   % 1. CLI -> Scanner  (vertical up)
-  \draw[arr] (cli) -- node[lbl, right=2pt] {invokes} (scan);
+  \draw[arr] (cli) -- node[lbl, right=4pt] {invokes} (scan);
 
   % 2. Scanner -> AI Tool  (L-shape: left along top, then down)
-  \draw[arr] (scan.west) -| node[lbl, above, pos=0.25] {scans project files} (ai.north);
+  \draw[arr] (scan.west) -| node[lbl, above=3pt, pos=0.25] {scans project files} (ai.north);
 
   % 3. CLI <-> Secret Store  (horizontal)
-  \draw[darr] (cli) -- node[lbl, above] {encrypt / decrypt} (store);
+  \draw[darr] (cli) -- node[lbl, above=3pt] {encrypt / decrypt} (store);
 
-  % 4. CLI -> Hooks  (diagonal down-left, label near CLI)
-  \draw[arr] (cli) -- node[lbl, above, sloped, pos=0.3] {installs} (hooks);
+  % 4. CLI -> Hooks  (diagonal down-left)
+  \draw[arr] (cli) -- node[lbl, above=3pt, sloped, pos=0.3] {installs} (hooks);
 
-  % 5. Hooks -> AI Tool  (vertical up, no crossing)
-  \draw[arr] (hooks) -- node[lbl, left=2pt] {constrains} (ai);
+  % 5. Hooks -> AI Tool  (vertical up)
+  \draw[arr] (hooks) -- node[lbl, left=4pt] {constrains} (ai);
 
-  % 6. AI Tool -> Transcripts  (diagonal down-right, label near AI Tool)
-  \draw[arr] (ai) -- node[lbl, above, sloped, pos=0.3] {writes} (trans);
+  % 6. AI Tool -> Transcripts  (diagonal down-right)
+  \draw[arr] (ai) -- node[lbl, above=3pt, sloped, pos=0.3] {writes} (trans);
 
-  % 7. CLI -> Transcripts  (vertical down, no crossing)
-  \draw[arr] (cli) -- node[lbl, right=2pt] {clean / watch} (trans);
+  % 7. CLI -> Transcripts  (vertical down)
+  \draw[arr] (cli) -- node[lbl, right=4pt] {clean / watch} (trans);
 
   % Bounding box
   \begin{scope}[on background layer]
