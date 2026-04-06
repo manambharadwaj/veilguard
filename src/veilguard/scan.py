@@ -21,6 +21,18 @@ from veilguard.patterns import (
 
 @dataclass
 class ScanFinding:
+    """A single credential detected during a project scan.
+
+    Attributes:
+        file: Relative path (or label) of the file containing the finding.
+        line: One-based line number where the credential was found.
+        pattern_id: Identifier of the matched ``CredentialPattern``.
+        pattern_name: Human-readable name of the matched pattern.
+        severity: ``"critical"`` for config/global files, ``"high"`` for source.
+        preview: Masked excerpt of the matching line (max 80 chars).
+        fix: Optional remediation guidance string from ``FIX_GUIDANCE``.
+    """
+
     file: str
     line: int
     pattern_id: str
@@ -123,6 +135,18 @@ def scan(
     include_tests: bool = False,
     max_source_files: int = 5000,
 ) -> list[ScanFinding]:
+    """Scan project files for hardcoded credentials.
+
+    Args:
+        project_dir: Root directory to scan.
+        scan_global: Also scan global Claude config files (``~/.claude/``).
+        scan_source: Walk source files in addition to config files.
+        include_tests: Include test directories and test file naming patterns.
+        max_source_files: Cap on source files to scan (performance guard).
+
+    Returns:
+        A list of ``ScanFinding`` objects sorted by severity then path.
+    """
     root = Path(project_dir).resolve()
     findings: list[ScanFinding] = []
     config_set = set(CONFIG_FILES)

@@ -14,6 +14,12 @@ from veilguard.watch import is_watch_running
 
 
 def status(project_dir: str) -> dict[str, Any]:
+    """Report whether VeilGuard protections are active for *project_dir*.
+
+    Returns a dict with keys: ``is_protected``, ``configured_tools``,
+    ``hook_installed``, ``deny_rule_count``, ``secrets_found``, and
+    ``transcript_protection`` (nested dict with watcher and hook status).
+    """
     root = Path(project_dir).resolve()
     hook_path = root / ".claude" / "hooks" / "veilguard-guard.sh"
     hook_installed = hook_path.is_file()
@@ -65,8 +71,8 @@ def status(project_dir: str) -> dict[str, Any]:
         transcripts = discover_transcripts()
         jsonl = [f for f in transcripts if f.endswith(".jsonl")]
         transcript_files = len(jsonl)
-        for fp in jsonl[:3]:
-            fings, _ = scan_transcript_file(fp, True)
+        for transcript_fp in jsonl[:3]:
+            fings, _ = scan_transcript_file(transcript_fp, True)
             transcript_secrets += len(fings)
     except Exception as exc:
         print(f"Warning: could not scan transcripts: {exc}", file=sys.stderr)

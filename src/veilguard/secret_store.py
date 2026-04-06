@@ -17,6 +17,13 @@ _SAFE_NAME = re.compile(r"^[a-zA-Z0-9_-]+$")
 
 
 class SecretStore:
+    """High-level API for storing and retrieving secrets.
+
+    Delegates to a ``WritableSecretBackend`` (default: local AES-256-GCM
+    encrypted store). Usable as a context manager to ensure the backend's
+    encryption key is destroyed on exit.
+    """
+
     def __init__(
         self,
         *,

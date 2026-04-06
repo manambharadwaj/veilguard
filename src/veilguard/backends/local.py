@@ -57,6 +57,17 @@ def _time_ms() -> int:
 
 
 class LocalBackend:
+    """AES-256-GCM encrypted local file backend for secret storage.
+
+    Secrets are kept in a single encrypted JSON blob at
+    ``~/.veilguard/store/secrets.enc``.  Key material is derived via scrypt
+    from a user-supplied passphrase or a default derived from ``$HOME`` and
+    ``$USER``.
+
+    All writes use advisory file locking (``fcntl.flock``) and atomic
+    tmpfile-rename to ensure crash safety and mutual exclusion.
+    """
+
     name = "local"
 
     def __init__(self, config: dict[str, Any] | None = None) -> None:

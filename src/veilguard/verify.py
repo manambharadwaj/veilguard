@@ -13,6 +13,20 @@ from veilguard.transcript import discover_transcripts, scan_transcript_file
 
 @dataclass
 class VerifyResult:
+    """Result of verifying credential exposure in AI context and transcripts.
+
+    Attributes:
+        env_vars: Mapping of known credential env-var names to whether they
+            are currently set (``True`` if non-empty, ``False`` otherwise).
+        exposed_in_context: List of dicts describing credentials found in AI
+            context files (keys: ``env_var``, ``pattern_name``, ``file``, ``line``).
+        exposed_in_transcripts: List of dicts describing credentials found in
+            Claude Code transcripts (keys: ``file``, ``line``, ``json_path``,
+            ``pattern_name``).
+        passed: ``True`` when no exposures were found in either context or
+            transcripts; ``False`` otherwise.
+    """
+
     env_vars: dict[str, bool] = field(default_factory=dict)
     exposed_in_context: list[dict] = field(default_factory=list)
     exposed_in_transcripts: list[dict] = field(default_factory=list)
@@ -44,6 +58,12 @@ PROJECT_CONTEXT_FILES = [
 
 
 def verify(project_dir: str | os.PathLike[str]) -> VerifyResult:
+    """Verify that credentials are not exposed in AI context or transcripts.
+
+    Checks global and project-level AI instruction/config files for credential
+    patterns, scans recent Claude Code transcripts, and reports whether any
+    env-var-backed secrets appear in places the AI assistant can read.
+    """
     env_vars: dict[str, bool] = {}
     exposed_in_context: list[dict] = []
     exposed_in_transcripts: list[dict] = []

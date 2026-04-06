@@ -15,6 +15,17 @@ from veilguard.patterns import CREDENTIAL_PATTERNS, CredentialPattern
 
 @dataclass
 class TranscriptFinding:
+    """A credential found inside a Claude Code transcript file.
+
+    Attributes:
+        file: Display path of the transcript (``~``-relative).
+        line: One-based line number in the JSONL/Markdown file.
+        json_path: Dot-separated key path within the parsed JSON object.
+        pattern_id: Identifier of the matched ``CredentialPattern``.
+        pattern_name: Human-readable name of the matched pattern.
+        preview: Redacted excerpt (max 80 chars).
+    """
+
     file: str
     line: int
     json_path: str
@@ -25,6 +36,16 @@ class TranscriptFinding:
 
 @dataclass
 class CleanResult:
+    """Aggregate outcome of a ``clean_transcripts`` run.
+
+    Attributes:
+        files_scanned: Number of transcript files inspected.
+        files_with_secrets: How many of those contained at least one finding.
+        total_findings: Total credential matches across all files.
+        total_redacted: Number of findings actually redacted (zero in dry-run).
+        findings: Individual ``TranscriptFinding`` objects.
+    """
+
     files_scanned: int
     files_with_secrets: int
     total_findings: int
@@ -244,6 +265,16 @@ def clean_transcripts(
     target_path: str | os.PathLike[str] | None = None,
     last_session: bool = False,
 ) -> CleanResult:
+    """Scan Claude Code transcripts for credentials and optionally redact them.
+
+    Args:
+        dry_run: If ``True``, report findings without modifying files.
+        target_path: Limit scanning to a specific file or directory.
+        last_session: Only process the most recent JSONL per project directory.
+
+    Returns:
+        A ``CleanResult`` with counts and individual findings.
+    """
     result = CleanResult(0, 0, 0, 0, [])
     files = discover_transcripts(target_path)
 

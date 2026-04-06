@@ -125,30 +125,30 @@ def main() -> None:
 
     if args.cmd == "verify":
         d = os.path.abspath(args.dir)
-        v = verify(d)
+        vr = verify(d)
         if args.json_output:
-            print(json.dumps(dataclasses.asdict(v), indent=2))
+            print(json.dumps(dataclasses.asdict(vr), indent=2))
         else:
-            print("Passed:", v.passed)
-            env_set = sum(1 for x in v.env_vars.values() if x)
-            print(f"Env vars with values: {env_set}/{len(v.env_vars)}")
-            print("Exposed in context:", len(v.exposed_in_context))
-            print("Exposed in transcripts:", len(v.exposed_in_transcripts))
-            if v.exposed_in_context:
-                print(json.dumps(v.exposed_in_context[:20], indent=2))
-        if not v.passed:
+            print("Passed:", vr.passed)
+            env_set = sum(1 for x in vr.env_vars.values() if x)
+            print(f"Env vars with values: {env_set}/{len(vr.env_vars)}")
+            print("Exposed in context:", len(vr.exposed_in_context))
+            print("Exposed in transcripts:", len(vr.exposed_in_transcripts))
+            if vr.exposed_in_context:
+                print(json.dumps(vr.exposed_in_context[:20], indent=2))
+        if not vr.passed:
             sys.exit(1)
         return
 
     if args.cmd == "clean":
-        r = clean_transcripts(
+        cr = clean_transcripts(
             dry_run=args.dry_run,
             target_path=args.path,
             last_session=args.last_session,
         )
         print(
-            f"Scanned {r.files_scanned} file(s); {r.files_with_secrets} with findings; "
-            f"{r.total_findings} finding(s); redacted {r.total_redacted}."
+            f"Scanned {cr.files_scanned} file(s); {cr.files_with_secrets} with findings; "
+            f"{cr.total_findings} finding(s); redacted {cr.total_redacted}."
         )
         return
 

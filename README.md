@@ -7,6 +7,9 @@ VeilGuard is a Python CLI that scans your codebase for hardcoded credentials, in
 Supports **Cursor**, **Claude Code**, **GitHub Copilot**, **Windsurf**, **Cline**, and **Aider**.
 
 [![CI](https://github.com/manambharadwaj/veilguard/actions/workflows/ci.yml/badge.svg)](https://github.com/manambharadwaj/veilguard/actions/workflows/ci.yml)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Patterns](https://img.shields.io/badge/patterns-55-orange.svg)](src/veilguard/patterns.py)
 
 ---
 
@@ -14,7 +17,7 @@ Supports **Cursor**, **Claude Code**, **GitHub Copilot**, **Windsurf**, **Cline*
 
 AI coding assistants read your project files, config, and sometimes transcripts. If a secret is in any of those, it enters the AI context — and potentially the cloud. VeilGuard prevents that:
 
-- **Scans** source and config files for 45+ credential patterns (AWS, OpenAI, Stripe, GitHub, Slack, database URIs, PEM keys, and more)
+- **Scans** source and config files for 55 credential patterns (AWS, OpenAI, Stripe, GitHub, Slack, database URIs, PEM keys, and more)
 - **Blocks** AI tools from reading secret files (`.env`, `*.pem`, `*.key`, `.aws/credentials`, etc.)
 - **Redacts** secrets that leak into Claude Code JSONL transcripts
 - **Stores** secrets locally with AES-256-GCM encryption so you never need to hardcode them
@@ -108,7 +111,7 @@ veilguard verify
 
 ### Credential Scanning
 
-VeilGuard ships 45+ regex patterns organized by category:
+VeilGuard ships 55 regex patterns organized by category:
 
 | Category | Examples |
 |----------|---------|
@@ -148,7 +151,7 @@ All file writes use atomic tmp-file + `chmod 600` + rename to prevent partial wr
 ## Supported Credential Patterns
 
 <details>
-<summary>Full list of 45+ detected patterns (click to expand)</summary>
+<summary>Full list of 55 detected patterns (click to expand)</summary>
 
 | Pattern | Prefix/Signature |
 |---------|-----------------|

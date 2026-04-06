@@ -9,12 +9,13 @@ from pathlib import Path
 SelectableBackendType = str  # "local" | future: keychain, vault, ...
 
 
-def read_backend_config() -> dict:
+def read_backend_config() -> dict[str, str]:
     path = Path.home() / ".veilguard" / "backend.json"
     if not path.is_file():
         return {}
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        result: dict[str, str] = json.loads(path.read_text(encoding="utf-8"))
+        return result
     except Exception as exc:
         import sys
 
@@ -22,7 +23,7 @@ def read_backend_config() -> dict:
         return {}
 
 
-def write_backend_config(data: dict) -> None:
+def write_backend_config(data: dict[str, str]) -> None:
     root = Path.home() / ".veilguard"
     root.mkdir(parents=True, mode=0o700, exist_ok=True)
     path = root / "backend.json"
@@ -33,6 +34,7 @@ def write_backend_config(data: dict) -> None:
 
 
 def resolve_backend_type(override: SelectableBackendType | None = None) -> SelectableBackendType:
+    """Determine which backend to use (override > env > config > ``"local"``)."""
     if override:
         return override
     env = os.environ.get("VEILGUARD_BACKEND")

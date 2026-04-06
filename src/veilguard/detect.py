@@ -11,6 +11,15 @@ AITool = str  # literal union optional in 3.12+
 
 @dataclass(frozen=True)
 class DetectionResult:
+    """Describes an AI coding tool detected in a project directory.
+
+    Attributes:
+        tool: Canonical short name (e.g. ``"claude-code"``, ``"cursor"``).
+        config_dir: Relative path to the tool's configuration directory.
+        settings_file: Relative path to the primary settings/instruction file.
+        hooks_supported: Whether the tool supports executable hooks.
+    """
+
     tool: AITool
     config_dir: str
     settings_file: str
@@ -64,6 +73,10 @@ _DETECTORS: list[dict] = [
 
 
 def detect_ai_tools(project_dir: str | os.PathLike[str]) -> list[DetectionResult]:
+    """Detect AI coding tools present in *project_dir* by filesystem markers.
+
+    Returns results sorted with hook-supporting tools first.
+    """
     root = Path(project_dir).resolve()
     results: list[DetectionResult] = []
     for d in _DETECTORS:
@@ -83,6 +96,7 @@ def detect_ai_tools(project_dir: str | os.PathLike[str]) -> list[DetectionResult
 
 
 def tool_display_name(tool: AITool) -> str:
+    """Return a human-friendly display name for a tool identifier."""
     return {
         "claude-code": "Claude Code",
         "cursor": "Cursor",

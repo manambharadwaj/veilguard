@@ -13,6 +13,10 @@ def create_backend(
     backend_type: str | None = None,
     config: dict[str, Any] | None = None,
 ) -> WritableSecretBackend:
+    """Construct and return a secret backend of the given type.
+
+    Raises ``ValueError`` if *backend_type* is not supported.
+    """
     resolved = resolve_backend_type(backend_type)
     if resolved == "local":
         return LocalBackend(config)

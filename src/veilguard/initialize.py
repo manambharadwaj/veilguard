@@ -54,7 +54,8 @@ def _read_json(path: Path) -> dict[str, Any]:
     if not path.is_file():
         return {}
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        result: dict[str, Any] = json.loads(path.read_text(encoding="utf-8"))
+        return result
     except Exception as exc:
         import sys
 
@@ -359,6 +360,12 @@ def quick_scan(project_dir: Path) -> int:
 
 
 def init_project(project_dir: str) -> dict[str, Any]:
+    """Detect AI tools in *project_dir* and install VeilGuard protections.
+
+    Installs tool-specific hooks, deny rules, and instruction files.
+    Returns a summary dict with ``tools_detected``, ``tools_configured``,
+    ``files_created``, ``files_modified``, and ``secrets_found``.
+    """
     root = Path(project_dir).resolve()
     created: list[str] = []
     modified: list[str] = []

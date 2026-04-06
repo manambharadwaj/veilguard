@@ -11,6 +11,16 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class CredentialPattern:
+    """A compiled regex pattern that identifies a specific credential type.
+
+    Attributes:
+        id: Short unique identifier (e.g. ``"anthropic"``, ``"aws-access"``).
+        name: Human-readable label (e.g. ``"Anthropic API Key"``).
+        regex: Compiled regular expression that matches the credential.
+        env_prefix: Conventional environment variable name for this credential.
+        category: Grouping label (``"ai-ml"``, ``"cloud"``, ``"payment"``, etc.).
+    """
+
     id: str
     name: str
     regex: re.Pattern[str]
