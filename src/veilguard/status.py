@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
+from typing import Any
 
 from veilguard.detect import detect_ai_tools
 from veilguard.scan import scan
@@ -11,7 +13,7 @@ from veilguard.transcript import discover_transcripts, scan_transcript_file
 from veilguard.watch import is_watch_running
 
 
-def status(project_dir: str) -> dict:
+def status(project_dir: str) -> dict[str, Any]:
     root = Path(project_dir).resolve()
     hook_path = root / ".claude" / "hooks" / "veilguard-guard.sh"
     hook_installed = hook_path.is_file()
@@ -31,8 +33,8 @@ def status(project_dir: str) -> dict:
                 )
                 for h in stop_hooks
             )
-        except Exception:
-            pass
+        except Exception as exc:
+            print(f"Warning: could not read Claude settings: {exc}", file=sys.stderr)
 
     configured_tools: list[str] = []
     marker = "veilguard:managed"
@@ -66,8 +68,8 @@ def status(project_dir: str) -> dict:
         for fp in jsonl[:3]:
             fings, _ = scan_transcript_file(fp, True)
             transcript_secrets += len(fings)
-    except Exception:
-        pass
+    except Exception as exc:
+        print(f"Warning: could not scan transcripts: {exc}", file=sys.stderr)
 
     is_protected = hook_installed or len(configured_tools) > 0
 

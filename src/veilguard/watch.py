@@ -37,6 +37,12 @@ def start_watch() -> None:
         print("VeilGuard watch already running (pid file present and process alive).")
         return
 
+    if PID_FILE.is_file():
+        try:
+            PID_FILE.unlink()
+        except OSError:
+            pass
+
     transcript_root = Path.home() / ".claude" / "projects"
     if not transcript_root.is_dir():
         print("Transcript directory not found:", transcript_root)

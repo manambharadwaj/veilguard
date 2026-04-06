@@ -15,7 +15,10 @@ def read_backend_config() -> dict:
         return {}
     try:
         return json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
+    except Exception as exc:
+        import sys
+
+        print(f"Warning: could not read backend config: {exc}", file=sys.stderr)
         return {}
 
 

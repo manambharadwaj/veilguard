@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -64,7 +65,7 @@ def verify(project_dir: str | os.PathLike[str]) -> VerifyResult:
             continue
         try:
             st = abs_path.stat()
-            if not st.is_file() or st.st_size > 10 * 1024 * 1024:
+            if st.st_size > 10 * 1024 * 1024:
                 continue
             content = abs_path.read_text(encoding="utf-8", errors="replace")
         except OSError:
@@ -98,13 +99,10 @@ def verify(project_dir: str | os.PathLike[str]) -> VerifyResult:
                         "pattern_name": f.pattern_name,
                     }
                 )
-    except Exception:
-        pass
+    except Exception as exc:
+        print(f"Warning: could not scan transcripts: {exc}", file=sys.stderr)
 
-    any_env = any(env_vars.values())
-    passed = bool(
-        any_env and len(exposed_in_context) == 0 and len(exposed_in_transcripts) == 0
-    )
+    passed = len(exposed_in_context) == 0 and len(exposed_in_transcripts) == 0
     return VerifyResult(
         env_vars=env_vars,
         exposed_in_context=exposed_in_context,

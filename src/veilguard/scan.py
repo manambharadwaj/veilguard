@@ -111,10 +111,7 @@ def _is_known_example(line: str, match: re.Match[str]) -> bool:
 
 
 def _mask_line(line: str, pattern: CredentialPattern) -> str:
-    flags = pattern.regex.flags | re.MULTILINE
-    if not (flags & re.DOTALL):
-        pass
-    global_rx = re.compile(pattern.regex.pattern, flags)
+    global_rx = re.compile(pattern.regex.pattern, pattern.regex.flags | re.MULTILINE)
     return global_rx.sub(f"[{pattern.name} REDACTED]", line)
 
 

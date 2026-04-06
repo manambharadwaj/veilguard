@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 import os
 import sys
@@ -17,24 +18,40 @@ from veilguard.verify import verify
 from veilguard.watch import start_watch
 
 
+def _add_json_flag(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--json", action="store_true", dest="json_output", help="Output as JSON")
+
+
 def main() -> None:
-    parser = argparse.ArgumentParser(prog="veilguard", description="VeilGuard — secrets out of AI context")
+    parser = argparse.ArgumentParser(
+        prog="veilguard",
+        description="VeilGuard — secrets out of AI context",
+    )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     p_init = sub.add_parser("init", help="Install protections for detected AI tools")
     p_init.add_argument("dir", nargs="?", default=".", help="Project directory")
+    _add_json_flag(p_init)
 
     p_scan = sub.add_parser("scan", help="Scan for hardcoded credentials")
     p_scan.add_argument("dir", nargs="?", default=".")
     p_scan.add_argument("--include-tests", action="store_true")
+    p_scan.add_argument("--fix", action="store_true", help="Show remediation guidance")
+    _add_json_flag(p_scan)
 
-    sub.add_parser("status", help="Show protection status").add_argument("dir", nargs="?", default=".")
-    sub.add_parser("verify", help="Verify env vars vs context exposure").add_argument("dir", nargs="?", default=".")
+    p_status = sub.add_parser("status", help="Show protection status")
+    p_status.add_argument("dir", nargs="?", default=".")
+    _add_json_flag(p_status)
+
+    p_verify = sub.add_parser("verify", help="Verify env vars vs context exposure")
+    p_verify.add_argument("dir", nargs="?", default=".")
+    _add_json_flag(p_verify)
 
     p_clean = sub.add_parser("clean", help="Redact secrets in Claude transcripts")
     p_clean.add_argument("--dry-run", action="store_true")
     p_clean.add_argument("--last", action="store_true", dest="last_session")
+    p_clean.add_argument("--path", default=None, help="Target path (file or directory)")
 
     sub.add_parser("watch", help="Watch transcripts and redact (foreground)")
 
@@ -58,50 +75,77 @@ def main() -> None:
     if args.cmd == "init":
         d = os.path.abspath(args.dir)
         r = init_project(d)
-        print(f"  Detected:  {', '.join(r['tools_detected']) or '(none — defaulting to Claude Code)'}")
-        print(f"  Configured: {', '.join(r['tools_configured'])}")
-        print(f"  Quick-scan findings in config files: {r['secrets_found']}")
-        for f in r["files_created"]:
-            print(f"  + created {f}")
-        for f in r["files_modified"]:
-            print(f"  ~ updated {f}")
-        print("  Done.")
+        if args.json_output:
+            print(json.dumps(r, indent=2))
+        else:
+            print(f"  Detected:  {', '.join(r['tools_detected']) or '(none — defaulting to Claude Code)'}")
+            print(f"  Configured: {', '.join(r['tools_configured'])}")
+            print(f"  Quick-scan findings in config files: {r['secrets_found']}")
+            for f in r["files_created"]:
+                print(f"  + created {f}")
+            for f in r["files_modified"]:
+                print(f"  ~ updated {f}")
+            print("  Done.")
         return
 
     if args.cmd == "scan":
         d = os.path.abspath(args.dir)
         findings = scan(d, include_tests=args.include_tests)
-        for f in findings:
-            print(f"{f.file}:{f.line} [{f.severity}] {f.pattern_name} — {f.preview}")
-        if not findings:
-            print("No credential patterns matched.")
+        if args.json_output:
+            print(json.dumps([dataclasses.asdict(f) for f in findings], indent=2))
+        else:
+            for f in findings:
+                print(f"{f.file}:{f.line} [{f.severity}] {f.pattern_name} — {f.preview}")
+                if args.fix and f.fix:
+                    print(f"  Fix: {f.fix}")
+            if not findings:
+                print("No credential patterns matched.")
+        if findings:
+            sys.exit(1)
         return
 
     if args.cmd == "status":
         d = os.path.abspath(args.dir)
         s = status(d)
-        print("Protected:", "yes" if s["is_protected"] else "no")
-        print("Hook installed:", s["hook_installed"])
-        print("Configured tools:", ", ".join(s["configured_tools"]) or "(none)")
-        print("Deny rules:", s["deny_rule_count"])
-        print("Scan findings (project):", s["secrets_found"])
-        tp = s["transcript_protection"]
-        print("Transcripts:", tp["transcript_files"], "files; secrets in recent:", tp["transcript_secrets_found"])
-        print("Stop hook:", tp["stop_hook_installed"], "| Watch running:", tp["watcher_running"])
+        if args.json_output:
+            print(json.dumps(s, indent=2))
+        else:
+            print("Protected:", "yes" if s["is_protected"] else "no")
+            print("Hook installed:", s["hook_installed"])
+            print("Configured tools:", ", ".join(s["configured_tools"]) or "(none)")
+            print("Deny rules:", s["deny_rule_count"])
+            print("Scan findings (project):", s["secrets_found"])
+            tp = s["transcript_protection"]
+            print(
+                "Transcripts:", tp["transcript_files"],
+                "files; secrets in recent:", tp["transcript_secrets_found"],
+            )
+            print("Stop hook:", tp["stop_hook_installed"], "| Watch running:", tp["watcher_running"])
         return
 
     if args.cmd == "verify":
         d = os.path.abspath(args.dir)
         v = verify(d)
-        print("Passed:", v.passed)
-        print("Exposed in context:", len(v.exposed_in_context))
-        print("Exposed in transcripts:", len(v.exposed_in_transcripts))
-        if v.exposed_in_context:
-            print(json.dumps(v.exposed_in_context[:20], indent=2))
+        if args.json_output:
+            print(json.dumps(dataclasses.asdict(v), indent=2))
+        else:
+            print("Passed:", v.passed)
+            env_set = sum(1 for x in v.env_vars.values() if x)
+            print(f"Env vars with values: {env_set}/{len(v.env_vars)}")
+            print("Exposed in context:", len(v.exposed_in_context))
+            print("Exposed in transcripts:", len(v.exposed_in_transcripts))
+            if v.exposed_in_context:
+                print(json.dumps(v.exposed_in_context[:20], indent=2))
+        if not v.passed:
+            sys.exit(1)
         return
 
     if args.cmd == "clean":
-        r = clean_transcripts(dry_run=args.dry_run, last_session=args.last_session)
+        r = clean_transcripts(
+            dry_run=args.dry_run,
+            target_path=args.path,
+            last_session=args.last_session,
+        )
         print(
             f"Scanned {r.files_scanned} file(s); {r.files_with_secrets} with findings; "
             f"{r.total_findings} finding(s); redacted {r.total_redacted}."
@@ -131,7 +175,11 @@ def main() -> None:
             return
         if args.sec_cmd == "remove":
             ok = store.remove_secret(args.name)
-            print("Removed" if ok else "Not found")
+            if ok:
+                print("Removed")
+            else:
+                print("Not found", file=sys.stderr)
+                sys.exit(1)
             return
 
     if args.cmd == "backend":

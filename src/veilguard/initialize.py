@@ -55,7 +55,10 @@ def _read_json(path: Path) -> dict[str, Any]:
         return {}
     try:
         return json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
+    except Exception as exc:
+        import sys
+
+        print(f"Warning: could not read {path}: {exc}", file=sys.stderr)
         return {}
 
 

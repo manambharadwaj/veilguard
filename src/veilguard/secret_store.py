@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from types import TracebackType
 from typing import TYPE_CHECKING
 
 from veilguard.backends.config import resolve_backend_type
@@ -26,6 +27,17 @@ class SecretStore:
             self._backend = backend
         else:
             self._backend = create_backend(resolve_backend_type(backend_type))
+
+    def __enter__(self) -> SecretStore:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        self._backend.destroy()
 
     def set_secret(self, name: str, value: str) -> None:
         _validate_secret_name(name)
