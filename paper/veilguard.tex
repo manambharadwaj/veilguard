@@ -264,54 +264,72 @@ VeilGuard is a Python CLI of roughly 2{,}400 lines of source (tests excluded),
 organized into eight modules. Figure~\ref{fig:arch} shows how the pieces fit
 together.
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
 \begin{tikzpicture}[
-    node distance=1.2cm and 1.8cm,
-    box/.style={draw, rounded corners, minimum width=2.2cm, minimum height=0.9cm,
-                font=\footnotesize, align=center, fill=white, text width=2cm},
-    clibox/.style={draw, rounded corners, minimum width=2.6cm, minimum height=1.1cm,
-                   font=\footnotesize, align=center, fill=blue!10, text width=2.4cm},
-    arr/.style={-{Stealth[length=2.5mm]}, thick},
-    darr/.style={{Stealth[length=2.5mm]}-{Stealth[length=2.5mm]}, thick},
-    lbl/.style={font=\scriptsize, fill=white, inner sep=1pt},
+    box/.style={draw, rounded corners=3pt, minimum width=2.4cm, minimum height=1cm,
+                font=\small, align=center, thick},
+    clibox/.style={draw, rounded corners=3pt, minimum width=2.8cm, minimum height=1.2cm,
+                   font=\small, align=center, thick, fill=blue!8},
+    arr/.style={-{Stealth[length=3mm]}, thick, gray!80},
+    darr/.style={{Stealth[length=3mm]}-{Stealth[length=3mm]}, thick, gray!80},
+    lbl/.style={font=\footnotesize, fill=white, inner sep=2pt},
   ]
 
-  % Row 1: Scanner
-  \node[box, fill=purple!10] (scan) {Pattern Scanner\\(55 regexes)};
+  % Center: VeilGuard CLI
+  \node[clibox] (cli) {\textbf{VeilGuard}\\CLI};
 
-  % Row 2: AI Tool -- CLI -- Secret Store
-  \node[box, below left=1.2cm and 2.2cm of scan, fill=red!10] (ai) {AI Tool\\(Cursor,\\Claude, \ldots)};
-  \node[clibox, below=1.2cm of scan] (cli) {\textbf{VeilGuard}\\CLI};
-  \node[box, below right=1.2cm and 2.2cm of scan, fill=yellow!10] (store) {Encrypted\\Secret Store\\(AES-256)};
+  % Left of CLI: AI Tool
+  \node[box, fill=red!8, left=4cm of cli] (ai) {AI Tool\\(Cursor, Claude, \ldots)};
 
-  % Row 3: Transcripts -- Hooks
-  \node[box, below=1.4cm of ai, fill=orange!10] (trans) {Transcripts\\(.jsonl)};
-  \node[box, below=1.4cm of cli, fill=green!10, text width=2.4cm, minimum width=2.6cm] (hooks) {Hooks /\\Deny Rules /\\Instructions};
+  % Right of CLI: Encrypted Store
+  \node[box, fill=yellow!8, right=4cm of cli] (store) {Encrypted\\Secret Store\\(AES-256-GCM)};
 
-  % Arrows with labels placed clearly
-  \draw[arr] (cli) -- node[lbl, right] {invokes} (scan);
-  \draw[arr] (scan.west) -- +(-1.0,0) node[lbl, above left] {scans files};
+  % Above CLI: Pattern Scanner
+  \node[box, fill=purple!8, above=1.5cm of cli] (scan) {Pattern Scanner\\(55 regexes)};
+
+  % Below CLI: Hooks
+  \node[box, fill=green!8, below=1.5cm of cli, minimum width=2.8cm] (hooks) {Hooks / Deny Rules\\/ Instructions};
+
+  % Below AI Tool: Transcripts
+  \node[box, fill=orange!8, below=1.5cm of ai] (trans) {Transcripts\\(.jsonl)};
+
+  % Arrow: CLI -> Scanner
+  \draw[arr] (cli) -- node[lbl, right=2pt] {invokes} (scan);
+
+  % Arrow: Scanner -> scans files (left)
+  \draw[arr] (scan.west) -- node[lbl, above] {scans files} (scan.west -| ai.north);
+
+  % Arrow: CLI <-> Store
   \draw[darr] (cli) -- node[lbl, above] {encrypt / decrypt} (store);
-  \draw[arr] (cli) -- node[lbl, right] {installs} (hooks);
-  \draw[arr] (hooks.west) -- node[lbl, above] {constrains} (ai.south east);
-  \draw[arr] (ai) -- node[lbl, left] {writes} (trans);
-  \draw[arr] (cli.south west) ++(0,0.1) -- node[lbl, below, sloped] {clean / watch} (trans.north east);
+
+  % Arrow: CLI -> Hooks
+  \draw[arr] (cli) -- node[lbl, right=2pt] {installs} (hooks);
+
+  % Arrow: Hooks -> AI Tool (constrains)
+  \draw[arr] (hooks) -- node[lbl, below] {constrains} (trans.east |- hooks);
+  \draw[arr] (trans.east |- hooks) -- (ai);
+
+  % Arrow: AI Tool -> Transcripts
+  \draw[arr] (ai) -- node[lbl, left=2pt] {writes} (trans);
+
+  % Arrow: CLI -> Transcripts (clean/watch)
+  \draw[arr] (cli) -- node[lbl, below] {clean / watch} (trans);
 
   % Bounding box
   \begin{scope}[on background layer]
-    \node[draw=gray!70, dashed, rounded corners=4pt,
+    \node[draw=gray!60, dashed, rounded corners=6pt, line width=1pt,
           fit=(ai)(cli)(store)(hooks)(trans)(scan),
-          inner xsep=0.6cm, inner ysep=0.5cm,
-          label={[font=\footnotesize, fill=white, inner sep=2pt]above:Developer Machine}] {};
+          inner xsep=1cm, inner ysep=0.7cm,
+          label={[font=\small, fill=white, inner sep=3pt]above:\textit{Developer Machine}}] {};
   \end{scope}
 \end{tikzpicture}
 \caption{VeilGuard system architecture. The CLI installs hooks and deny rules
 into AI tool configurations, runs the pattern scanner over source and config
 files, redacts transcripts, and manages an encrypted secret store. The dashed
-boundary represents the local machine; no data leaves it.}
+boundary represents the local machine; no data crosses it.}
 \label{fig:arch}
-\end{figure}
+\end{figure*}
 
 \subsection{Credential Pattern Engine}
 \label{sec:patterns}
