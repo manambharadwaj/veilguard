@@ -1,0 +1,699 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{balance}
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny,
+  xleftmargin=2em,
+  columns=fullflexible,
+  keepspaces=true,
+}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  citecolor=blue,
+  urlcolor=blue,
+}
+
+\begin{document}
+
+\title{VeilGuard: Preventing Credential Exposure Through AI Coding Assistants}
+
+\author{
+\IEEEauthorblockN{Manam Bharadwaj}
+\IEEEauthorblockA{
+\textit{Independent Researcher}\\
+manambharadwaj@users.noreply.github.com}
+}
+
+\maketitle
+
+\begin{abstract}
+AI coding assistants such as Claude Code, Cursor, and GitHub Copilot read
+project files and persist conversation transcripts, creating a novel attack
+surface for credential exposure.  We present \textbf{VeilGuard}, an open-source
+Python tool that addresses this threat through five complementary mechanisms:
+regex-based credential scanning (55 patterns across 8 categories),
+tool-specific hook and deny-rule installation for 6 major AI assistants,
+deep transcript redaction, environment-variable exposure verification, and an
+AES-256-GCM encrypted local secret store.  We evaluate VeilGuard on a curated
+benchmark corpus of 93 files and compare it against three established secret
+scanners.  VeilGuard achieves perfect precision and recall (F1~=~1.00) on our
+corpus while scanning at 8{,}970 files/second---outperforming gitleaks
+(F1~=~0.85), trufflehog (F1~=~0.53), and detect-secrets (F1~=~0.00) on the
+same workload.  Unlike prior tools that target git history or CI pipelines,
+VeilGuard operates on the developer workstation and intercepts credentials
+\emph{before} they enter the AI context window.
+\end{abstract}
+
+\begin{IEEEkeywords}
+secret detection, credential scanning, AI coding assistants, software security,
+developer tools, LLM security
+\end{IEEEkeywords}
+
+% ============================================================
+\section{Introduction}
+\label{sec:intro}
+
+AI-powered coding assistants have become integral to modern software
+development.  Tools such as Claude Code~\cite{anthropic2024claude}, GitHub
+Copilot~\cite{copilot2024}, Cursor~\cite{cursor2024}, Windsurf, Cline, and
+Aider read source code, configuration files, and instruction documents to
+provide context-aware completions, refactoring, and debugging assistance.
+Several of these tools also persist conversation history to local transcript
+files and transmit project context to remote large language model (LLM)
+endpoints.
+
+This architecture introduces a previously underexplored attack surface:
+\textbf{credential leakage through AI context}.  When a developer's API key,
+database connection string, or private key resides in a file that the AI
+assistant reads, the credential may be:
+
+\begin{enumerate}
+  \item Transmitted to a remote LLM endpoint, where it may be logged or
+        cached by the model provider.
+  \item Echoed back in generated code or conversation responses.
+  \item Persisted in local transcript files readable by other processes.
+  \item Extracted by prompt-injection attacks embedded in repository content.
+\end{enumerate}
+
+Traditional secret scanning tools~\cite{gitleaks2024,trufflehog2024,
+detectsecrets2024} focus on \emph{git history} and \emph{CI pipeline}
+integration.  They detect credentials that have already been committed.  None
+of them address the real-time threat of AI assistants reading credentials from
+the working tree, nor do they provide mechanisms to redact credentials from
+transcript files or block the AI from accessing secret-bearing files.
+
+We present \textbf{VeilGuard}, a Python CLI tool that provides defense in depth
+against credential exposure to AI coding assistants.  VeilGuard operates
+entirely on the developer workstation with zero network communication and
+addresses the AI-context threat through five complementary mechanisms:
+
+\begin{enumerate}
+  \item \textbf{Detection}: 55 regex patterns across 8 credential categories
+        scan source, configuration, and transcript files.
+  \item \textbf{Prevention}: Tool-specific hooks, deny rules, and instruction
+        files block AI assistants from reading secret-bearing files.
+  \item \textbf{Remediation}: Deep transcript redaction replaces credentials in
+        Claude Code JSONL histories with sanitized placeholders.
+  \item \textbf{Verification}: Continuous monitoring ensures that
+        environment-variable-backed secrets do not appear in AI context files.
+  \item \textbf{Isolation}: An AES-256-GCM encrypted local secret store
+        provides a secure alternative to hardcoding credentials.
+\end{enumerate}
+
+Our contributions are:
+
+\begin{itemize}
+  \item We identify and formalize the threat model for credential exposure
+        through AI coding assistants (\S\ref{sec:threat}).
+  \item We describe the design and implementation of VeilGuard, the first tool
+        purpose-built for this threat class (\S\ref{sec:design}).
+  \item We evaluate VeilGuard on a curated benchmark corpus and demonstrate
+        superior detection accuracy and throughput compared to three established
+        secret scanners (\S\ref{sec:eval}).
+  \item We release VeilGuard as open-source software on PyPI and
+        GitHub\footnote{\url{https://github.com/manambharadwaj/veilguard}}.
+\end{itemize}
+
+
+% ============================================================
+\section{Background and Related Work}
+\label{sec:related}
+
+\subsection{Secret Scanning in Software Development}
+
+Hardcoded credentials in source code remain a persistent security
+problem~\cite{meli2019bad}.  Prior work and tools address this through several
+approaches:
+
+\textbf{Regex-based scanners} such as gitleaks~\cite{gitleaks2024} and
+trufflehog~\cite{trufflehog2024} define pattern libraries for known credential
+formats and scan git repositories.  Gitleaks supports 150+ rules and operates
+on git diffs; trufflehog adds entropy-based and verification-based detection
+across multiple data sources.
+
+\textbf{Entropy-based detection} tools, including
+detect-secrets~\cite{detectsecrets2024}, use Shannon entropy to flag
+high-randomness strings as potential secrets.  This approach trades higher
+recall for increased false positives.
+
+\textbf{Pre-commit hooks} such as pre-commit~\cite{precommit2024} integrate
+secret scanners into the git workflow, blocking commits that contain credentials.
+
+\textbf{Cloud-native scanning} is provided by GitHub Secret
+Scanning~\cite{github_secret_scanning} and GitLab Secret
+Detection~\cite{gitlab_secret_detection}, which run server-side on push events.
+
+All of these approaches share a common limitation: they operate on \emph{committed}
+or \emph{staged} code.  None address the scenario where an AI assistant reads
+credentials from the working tree before they are committed, or where
+credentials persist in AI conversation transcripts.
+
+\subsection{AI Coding Assistant Security}
+
+The security implications of AI coding assistants are an active area of
+research.  Prior work has examined:
+
+\textbf{Prompt injection}~\cite{greshake2023inject}: Attackers embed malicious
+instructions in repository content (README files, issue templates, dependency
+files) that manipulate the AI assistant's behavior, potentially exfiltrating
+secrets.
+
+\textbf{Code generation vulnerabilities}~\cite{pearce2022asleep}: AI-generated
+code may introduce security flaws, including hardcoded credentials copied from
+training data.
+
+\textbf{Data exfiltration via tool use}: Modern AI assistants can execute shell
+commands, read files, and make network requests.  A compromised or manipulated
+assistant could use these capabilities to extract and transmit secrets.
+
+To our knowledge, VeilGuard is the first tool that specifically targets the
+intersection of credential management and AI coding assistant security.
+
+
+% ============================================================
+\section{Threat Model}
+\label{sec:threat}
+
+\subsection{Adversary Model}
+
+We consider two threat scenarios:
+
+\textbf{Inadvertent leakage} (primary).  A developer's credentials reside in
+files the AI assistant reads---source code, configuration files, environment
+files, MCP (Model Context Protocol) configurations, or instruction files.  The
+credential enters the AI context window and may be transmitted to a remote
+endpoint, persisted in transcripts, or echoed in generated output.
+
+\textbf{Prompt-injection extraction} (secondary).  An attacker crafts
+repository content that instructs the AI assistant to read credential files,
+print environment variables, or exfiltrate secrets through generated code.
+
+\subsection{Trust Boundaries}
+
+VeilGuard's trust model distinguishes between:
+
+\begin{itemize}
+  \item \textbf{Trusted}: Local filesystem (POSIX permissions), OS process
+        isolation, Python runtime, and the \texttt{cryptography} library for
+        AES-256-GCM.
+  \item \textbf{Untrusted}: AI assistant behavior (non-deterministic), AI
+        transcript files, remote LLM endpoints, and repository content
+        (potential prompt injection vector).
+\end{itemize}
+
+\subsection{Attack Surfaces}
+
+We identify five attack surfaces specific to AI coding assistants:
+
+\begin{enumerate}
+  \item \textbf{Context window injection}: Credentials in files the AI reads
+        (source, config, instruction files, MCP configs).
+  \item \textbf{Transcript persistence}: AI tools write conversation history to
+        disk; secrets discussed or produced during tool use persist in these
+        files.
+  \item \textbf{Environment variable exposure}: AI assistants that execute
+        shell commands may print or reference environment variables containing
+        secrets.
+  \item \textbf{Secret store extraction}: The AI may attempt to read
+        VeilGuard's own encrypted store or execute credential-extraction
+        commands.
+  \item \textbf{MCP configuration exposure}: Model Context Protocol server
+        configurations often embed API keys in plain JSON.
+\end{enumerate}
+
+\subsection{Out-of-Scope Threats}
+
+VeilGuard does not defend against model-side memorization of training data,
+a fully compromised developer machine, network-level interception of the
+assistant's API traffic, or physical access to the encryption key material.
+
+
+% ============================================================
+\section{System Design}
+\label{sec:design}
+
+\subsection{Architecture Overview}
+
+VeilGuard is implemented as a Python CLI (2{,}400 lines of source, excluding
+tests) organized into eight modules.  Figure~\ref{fig:arch} illustrates the
+system architecture.
+
+\begin{figure}[ht]
+\centering
+\small
+\begin{verbatim}
++---------------------------+
+|    Developer Machine      |
+|                           |
+|  +--------+   +---------+ |
+|  |AI Tool |<--| VeilGrd | |
+|  |(Cursor, |   |  CLI    | |
+|  | Claude,)|   +----+----+ |
+|  +----+----+        |      |
+|       |        +----v----+ |
+|       v        | Hooks / | |
+|  +----------+  | Deny /  | |
+|  |Transcripts| | Instrs  | |
+|  | (.jsonl)  | +---------+ |
+|  +----------+              |
+|       ^        +---------+ |
+|       +------->|Encrypted| |
+|    clean/watch |SecStore | |
+|                +---------+ |
++---------------------------+
+\end{verbatim}
+\caption{VeilGuard system architecture.  The CLI installs hooks and deny rules
+into AI tool configurations, scans source and config files, redacts transcripts,
+and provides an encrypted secret store.}
+\label{fig:arch}
+\end{figure}
+
+\subsection{Credential Pattern Engine}
+\label{sec:patterns}
+
+VeilGuard's scanner operates on a library of 55 compiled regular expression
+patterns organized into 8 categories: AI/ML (9 patterns), Cloud (9), Communication (8),
+Developer (10), Payment (5), Database (4), Auth (4), and Monitoring (5).  Each
+pattern is defined as a \texttt{CredentialPattern} dataclass with fields for
+a unique identifier, human-readable name, compiled regex, conventional
+environment variable name, and category.
+
+Patterns are ordered from most specific to least specific; the scanner applies
+a first-match-wins strategy per line.  This ordering prevents generic patterns
+(e.g., the OpenAI legacy key \texttt{sk-[a-zA-Z0-9]\{48,\}}) from shadowing
+more specific prefixes (e.g., \texttt{sk-ant-api03-} for Anthropic,
+\texttt{sk-proj-} for OpenAI project keys).
+
+\textbf{False positive mitigation.}  The scanner applies three filters before
+reporting a match:
+
+\begin{enumerate}
+  \item \textbf{Known example keys}: A frozen set of keys from vendor
+        documentation (e.g., \texttt{AKIAIOSFODNN7EXAMPLE}) is excluded.
+  \item \textbf{Placeholder detection}: 21 indicator substrings
+        (\texttt{example}, \texttt{placeholder}, \texttt{fake\_},
+        \texttt{change\_me}, etc.) are checked against the matched value.
+  \item \textbf{Comment heuristics}: Lines containing comment markers
+        (\texttt{//}, \texttt{\#}) with words like ``example'' or
+        ``placeholder'' are skipped.
+\end{enumerate}
+
+\textbf{Performance guards.}  Lines exceeding 4{,}096 characters and files
+exceeding 10~MB (config) or 1~MB (source) are skipped to bound regex execution
+time.  A prefix quick-check regex, compiled from literal prefixes of all
+patterns, allows early rejection of lines that cannot possibly match.
+
+\subsection{AI Tool Integration}
+\label{sec:integration}
+
+VeilGuard detects six AI coding tools via filesystem markers and installs
+tool-specific protections:
+
+\textbf{Claude Code} receives the deepest integration:
+
+\begin{itemize}
+  \item A \texttt{PreToolUse} bash hook intercepts file reads and shell
+        commands, blocking access to secret files (\texttt{.env}, \texttt{*.pem},
+        \texttt{.aws/credentials}, etc.) and commands that reference
+        sensitive environment variables.
+  \item A \texttt{Stop} hook automatically triggers transcript redaction when
+        a session ends.
+  \item 19 deny rules in \texttt{settings.json} block specific
+        file-access and command patterns.
+  \item Instructions appended to \texttt{CLAUDE.md} teach the model to use
+        environment variable references instead of hardcoded values.
+\end{itemize}
+
+\textbf{Cursor, GitHub Copilot, Windsurf, and Cline} receive instruction-file
+injections (appended to \texttt{.cursorrules},
+\texttt{copilot-instructions.md}, \texttt{.windsurfrules}, and
+\texttt{.clinerules} respectively) that instruct the AI to avoid reading
+secret files and to use environment variable references.
+
+\textbf{Aider} receives file patterns in \texttt{.aiderignore} that exclude
+secret files from the AI context.
+
+Table~\ref{tab:tool-integration} summarizes the protection mechanisms per tool.
+
+\begin{table}[ht]
+\centering
+\caption{VeilGuard Protection Mechanisms by AI Tool}
+\label{tab:tool-integration}
+\begin{tabular}{lccccc}
+\toprule
+Tool & Hook & Deny & Instr. & Ignore & Redact \\
+\midrule
+Claude Code   & \checkmark & \checkmark & \checkmark &            & \checkmark \\
+Cursor        &            &            & \checkmark &            &            \\
+Copilot       &            &            & \checkmark &            &            \\
+Windsurf      &            &            & \checkmark &            &            \\
+Cline         &            &            & \checkmark &            &            \\
+Aider         &            &            &            & \checkmark &            \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Transcript Redaction}
+\label{sec:transcript}
+
+Claude Code persists conversation history as JSONL files under
+\texttt{\textasciitilde/.claude/projects/}.  VeilGuard's transcript module:
+
+\begin{enumerate}
+  \item \textbf{Discovers} transcript files by recursively walking the Claude
+        projects directory, collecting \texttt{.jsonl} and session-memory
+        \texttt{summary.md} files.
+  \item \textbf{Deep-scans} each JSON line by recursively traversing all
+        nested dictionaries, lists, and string values, applying the full
+        55-pattern library.  Metadata keys (UUIDs, timestamps, session IDs)
+        are skipped to avoid false matches on high-entropy identifiers.
+  \item \textbf{Redacts} in place, replacing matched credentials with
+        \texttt{[REDACTED:<pattern\_id>]} tokens.  All writes use atomic
+        tmpfile-rename with \texttt{chmod 0600} to prevent partial writes or
+        permission leaks.
+\end{enumerate}
+
+A \texttt{watch} mode provides continuous polling (3-second interval) with a
+PID-file-based single-instance guard.
+
+\subsection{Encrypted Secret Store}
+\label{sec:store}
+
+VeilGuard provides a local secret store as an alternative to hardcoding
+credentials.  The cryptographic design uses:
+
+\begin{itemize}
+  \item \textbf{Key derivation}: \texttt{scrypt(key\_material, salt, n=16384,
+        r=8, p=1)} producing a 256-bit key.  The salt is 16 random bytes
+        generated once and stored at \texttt{\textasciitilde/.veilguard/store/.salt}.
+  \item \textbf{Encryption}: AES-256-GCM with a 12-byte random nonce per write.
+        The ciphertext format is \texttt{nonce (12B) || AESGCM(key, nonce,
+        plaintext)}.
+  \item \textbf{File safety}: All mutations use advisory locking
+        (\texttt{fcntl.flock}), atomic tmpfile-rename, and \texttt{chmod 0600}
+        / \texttt{0700} permissions.
+\end{itemize}
+
+The store follows a pluggable backend architecture with a
+\texttt{WritableSecretBackend} protocol, enabling future backends (e.g., cloud
+KMS integration) without changing the user-facing API.
+
+\subsection{Environment Verification}
+\label{sec:verify}
+
+The \texttt{verify} command checks whether any of 45 known credential
+environment variables (one per pattern) are set and then scans AI context
+files (global and project-level instruction files, settings, MCP configs) and
+the 5 most recent Claude Code transcripts for credential matches.  A
+verification ``pass'' requires zero exposures across both sources.
+
+
+% ============================================================
+\section{Evaluation}
+\label{sec:eval}
+
+\subsection{Benchmark Corpus}
+\label{sec:corpus}
+
+We constructed a curated benchmark corpus of 93 synthetic files:
+
+\begin{itemize}
+  \item \textbf{58 true-positive files}: One file per credential pattern (55
+        single-secret files) plus 2 multi-secret files (4 credentials each)
+        and 1 deeply-nested JSON file.  Credentials are randomly generated with
+        realistic formats and embedded in plausible code contexts.
+  \item \textbf{25 true-negative files}: Clean code in 13 languages and
+        formats, including environment variable references (\texttt{\$\{API\_KEY\}},
+        \texttt{process.env.KEY}), placeholder values, known example keys,
+        comments mentioning credential patterns, and benign high-entropy
+        strings (UUIDs, hashes, base64 data).
+  \item \textbf{10 edge cases}: Long lines (>4096 chars), mixed content
+        (secret sandwiched between safe code), Redis URIs without passwords,
+        two secrets on one line, public key headers, and comments containing
+        real credentials.
+\end{itemize}
+
+A ground-truth manifest maps each file to its expected findings (pattern IDs
+and line numbers) or expected count (for edge cases).  The corpus generation
+script uses a fixed random seed for reproducibility.
+
+\subsection{Detection Accuracy}
+\label{sec:accuracy}
+
+Table~\ref{tab:detection-accuracy} presents VeilGuard's detection performance
+on the benchmark corpus.
+
+\begin{table}[ht]
+\centering
+\caption{VeilGuard Detection Accuracy (Overall)}
+\label{tab:detection-accuracy}
+\begin{tabular}{lrrrrrr}
+\toprule
+ & TP & FP & FN & TN & Prec. & Recall \\
+\midrule
+Overall & 63 & 0 & 0 & 25 & 1.00 & 1.00 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+VeilGuard correctly identifies all 63 expected credential instances across the
+58 true-positive files with zero false positives against the 25 true-negative
+files, achieving precision, recall, and F1 of 1.00.
+
+Per-category analysis confirms perfect detection across all 8 categories and
+all 55 individual patterns.  The false positive filtering---known example keys,
+placeholder detection, and comment heuristics---successfully suppresses all 25
+true-negative files, including those containing high-entropy strings, AWS
+example keys, and comment-embedded credential patterns.
+
+\subsection{Edge Case Analysis}
+
+Of the 10 edge cases, VeilGuard correctly handles:
+
+\begin{itemize}
+  \item \textbf{Long line skip}: A 4{,}097-character line is correctly skipped
+        (0 findings expected and produced).
+  \item \textbf{Nested JSON}: A credential buried 3 levels deep in JSON is
+        detected.
+  \item \textbf{Mixed content}: A real credential between safe
+        \texttt{os.environ} lines is caught.
+  \item \textbf{Public key}: A PEM public key header does not trigger the
+        private key pattern.
+  \item \textbf{Two secrets on one line}: The first-match-wins strategy reports
+        one finding (by design).
+  \item \textbf{Comment with real credential}: A credential on a code line
+        with a ``DO NOT COMMIT'' comment is correctly flagged (the comment
+        heuristic only suppresses lines where the comment contains placeholder
+        indicators, not arbitrary warnings).
+\end{itemize}
+
+\subsection{Tool Comparison}
+\label{sec:comparison}
+
+We evaluated three established secret scanners on the same corpus:
+gitleaks~v8, trufflehog~v3.94, and detect-secrets~v1.5.  All tools were run
+in their default filesystem scanning mode against the corpus directory.
+
+\begin{table}[ht]
+\centering
+\caption{Comparison of Secret Scanning Tools on Benchmark Corpus}
+\label{tab:tool-comparison}
+\begin{tabular}{lrrrrrr}
+\toprule
+Tool & TP & FP & FN & Prec. & Recall & F1 \\
+\midrule
+\textbf{VeilGuard} & \textbf{58} & \textbf{0} & \textbf{0} & \textbf{1.00} & \textbf{1.00} & \textbf{1.00} \\
+gitleaks       & 43 & 0 & 15 & 1.00 & 0.74 & 0.85 \\
+trufflehog     & 21 & 0 & 37 & 1.00 & 0.36 & 0.53 \\
+detect-secrets &  0 & 0 & 58 & 0.00 & 0.00 & 0.00 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+At the file level (Table~\ref{tab:tool-comparison}), VeilGuard detects all 58
+true-positive files.  Gitleaks misses 15 files (primarily AI/ML-specific
+patterns like Anthropic, Groq, Perplexity, Fireworks, and newer platform tokens
+that postdate its rule set).  Trufflehog, which emphasizes verification-based
+detection, achieves only 36\% recall; without network verification, many
+patterns are not reported.  Detect-secrets produces zero detections in
+filesystem scan mode, as it is designed primarily for baseline-diff workflows
+rather than standalone directory scanning.
+
+All tools achieve 1.00 precision (no false positives against true-negative
+files), reflecting the specificity of prefix-based credential patterns.
+
+\subsection{Throughput}
+\label{sec:throughput}
+
+We measured VeilGuard's scan throughput over 5 iterations on the full 93-file
+corpus (231 total lines):
+
+\begin{table}[ht]
+\centering
+\caption{VeilGuard Scan Throughput}
+\label{tab:throughput}
+\begin{tabular}{lr}
+\toprule
+Metric & Value \\
+\midrule
+Files scanned & 93 \\
+Total lines & 231 \\
+Avg. scan time & 0.010~s \\
+Files/second & 8{,}970 \\
+Lines/second & 22{,}282 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The throughput of approximately 9{,}000 files per second (Table~\ref{tab:throughput})
+is sufficient for interactive use on projects of any practical size.  The
+5{,}000-file cap on source file traversal provides an additional performance
+guard for monorepos.
+
+
+% ============================================================
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Scope and Complementarity}
+
+VeilGuard addresses a specific threat class---credential exposure through AI
+coding assistants---that existing tools do not cover.  It is \emph{complementary}
+to, not a replacement for, traditional secret scanners.  A comprehensive
+security posture would combine VeilGuard (workstation-level, real-time
+prevention) with gitleaks or trufflehog (git-history scanning) and GitHub
+Secret Scanning (server-side push protection).
+
+\subsection{Enforcement Strength}
+
+The protection mechanisms vary in enforcement strength across AI tools.  Claude
+Code's \texttt{PreToolUse} hook provides a \emph{hard} enforcement boundary:
+the hook script executes before every file read or shell command, and a deny
+decision prevents the operation.  Other tools (Cursor, Copilot, Windsurf,
+Cline) rely on instruction-file compliance, which is \emph{advisory}---the
+LLM may not always follow instructions.  Aider's \texttt{.aiderignore} provides
+deterministic file exclusion at the tool level.
+
+\subsection{Limitations}
+
+\textbf{Regex-based detection} is inherently imprecise.  Novel credential
+formats not in the 55-pattern library will be missed.  Credentials split
+across lines, base64-encoded, or stored in binary files evade detection.
+
+\textbf{Benchmark corpus bias.}  Our evaluation corpus was designed alongside
+the pattern library.  The perfect F1 score reflects the alignment between
+patterns and test data rather than real-world coverage.  An independent,
+large-scale evaluation on production repositories would provide stronger
+evidence.
+
+\textbf{Transcript coverage.}  VeilGuard currently targets Claude Code JSONL
+transcripts.  Other tools may store conversation data in proprietary formats
+not yet supported.
+
+\textbf{Default key material.}  The encrypted store's default key is derived
+from \texttt{HOME} and \texttt{USER}---values readable by any process running
+as the same user.  This protects against casual cross-user access but not
+determined local attackers.
+
+\textbf{Platform dependency.}  File locking (\texttt{fcntl.flock}) and PID
+file semantics assume a POSIX environment.  Windows is not currently supported.
+
+\subsection{Threats to Validity}
+
+\textbf{Internal validity.}  The benchmark corpus uses synthetically generated
+credentials.  Real-world code may contain credential formats, obfuscation, or
+context that our synthetic samples do not capture.
+
+\textbf{External validity.}  The tool comparison was conducted on our curated
+corpus, not on diverse real-world repositories.  Performance on production
+codebases may differ due to file size distributions, language mix, and
+credential format variety.
+
+\textbf{Construct validity.}  We measure file-level detection (whether the tool
+reports \emph{any} finding in a file) rather than line-level or token-level
+precision.  This metric is appropriate for the use case (flagging files that
+need remediation) but may overstate precision for tools that produce additional
+findings within files.
+
+\subsection{Ethical Considerations}
+
+The benchmark corpus contains only synthetically generated credentials with
+no real secret material.  VeilGuard operates entirely locally with no network
+communication, no telemetry, and no data collection.  The tool is released
+under the MIT license.
+
+
+% ============================================================
+\section{Implementation}
+\label{sec:impl}
+
+VeilGuard is implemented in Python 3.11+ with a single external dependency
+(\texttt{cryptography} for AES-256-GCM).  The codebase comprises:
+
+\begin{itemize}
+  \item \textbf{2{,}400 lines} of source across 12 modules
+  \item \textbf{140 tests} with \texttt{pytest}, achieving coverage across
+        all modules
+  \item \textbf{Static analysis}: Ruff linting and mypy strict type checking
+  \item \textbf{CI}: GitHub Actions with Python 3.11/3.12/3.13 matrix testing
+  \item \textbf{Distribution}: Published on PyPI as \texttt{veilguard}
+\end{itemize}
+
+The CLI provides 8 subcommands: \texttt{init} (detect tools and install
+protections), \texttt{scan} (credential scanning), \texttt{status} (protection
+health), \texttt{verify} (environment exposure check), \texttt{clean}
+(transcript redaction), \texttt{watch} (continuous transcript monitoring),
+\texttt{secret} (secret store CRUD), and \texttt{backend} (storage backend
+management).
+
+
+% ============================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+AI coding assistants create a novel credential exposure risk by reading project
+files and persisting conversation transcripts.  VeilGuard addresses this gap
+with a defense-in-depth approach: scanning, prevention, redaction, verification,
+and encrypted storage.  Our evaluation demonstrates perfect detection on a
+55-pattern curated corpus and superior recall compared to three established
+scanners.
+
+Future work includes expanding transcript support to additional AI tools,
+adding entropy-based detection for unknown credential formats, implementing
+credential rotation assistance, and conducting a large-scale evaluation on
+open-source repositories to validate real-world effectiveness.
+
+VeilGuard is available at
+\url{https://github.com/manambharadwaj/veilguard} and installable via
+\texttt{pip install veilguard}.
+
+
+% ============================================================
+\section*{Acknowledgments}
+
+The author thanks the open-source community for the tools and libraries that
+made this work possible, including the Python \texttt{cryptography} library,
+Ruff, mypy, and pytest.
+
+% ============================================================
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
