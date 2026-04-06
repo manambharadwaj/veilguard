@@ -297,23 +297,23 @@ together.
   % 1. CLI invokes Scanner (vertical, clean)
   \draw[arr] (cli) -- node[lbl, right=2pt] {invokes} (scan);
 
-  % 2. Scanner scans project files (arrow left from scanner, stops above AI Tool)
-  \draw[arr] (scan) -- node[lbl, above] {scans project files} (ai |- scan);
+  % 2. Scanner scans project files (arrow left to AI Tool top)
+  \draw[arr] (scan) -- node[lbl, above] {scans project files} (ai.north -| ai);
 
-  % 3. CLI <-> Encrypted Store (horizontal, clean)
+  % 3. CLI <-> Encrypted Store (horizontal)
   \draw[darr] (cli) -- node[lbl, above] {encrypt / decrypt} (store);
 
-  % 4. CLI installs Hooks (vertical, clean)
+  % 4. CLI installs Hooks (vertical)
   \draw[arr] (cli) -- node[lbl, right=2pt] {installs} (hooks);
 
-  % 5. Hooks constrains AI Tool (direct horizontal arrow)
-  \draw[arr] (hooks) -- node[lbl, below] {constrains} (ai);
+  % 5. Hooks constrains AI Tool (direct, with label offset below)
+  \draw[arr] (hooks) -- node[lbl, below, pos=0.65] {constrains} (ai);
 
-  % 6. AI Tool writes Transcripts (vertical, clean)
+  % 6. AI Tool writes Transcripts (vertical)
   \draw[arr] (ai) -- node[lbl, left=2pt] {writes} (trans);
 
-  % 7. CLI redacts Transcripts (diagonal, single clean line)
-  \draw[arr] (cli) -- node[lbl, above, sloped] {clean / watch} (trans);
+  % 7. CLI redacts Transcripts (routed as L-shape to avoid crossing)
+  \draw[arr] (cli.west) -- ++(-0.8,0) |- node[lbl, left, pos=0.25] {clean / watch} (trans.east);
 
   % Bounding box
   \begin{scope}[on background layer]
