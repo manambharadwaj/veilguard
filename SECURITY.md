@@ -10,7 +10,7 @@
 
 **Do not open a public GitHub issue for security vulnerabilities.**
 
-Instead, please email **manambharadwaj@users.noreply.github.com** with:
+Instead, please email **manambharadwaj@gmail.com** with:
 
 - A description of the vulnerability
 - Steps to reproduce
